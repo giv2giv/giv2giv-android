@@ -1,5 +1,6 @@
 package org.giv2giv;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map.Entry;
 
@@ -55,14 +56,14 @@ public class SignupActivity extends Activity
             			((EditText)findViewById(R.id.stateField)).getText().toString()));
 //            	signupInfo.put("country", new Pair<Boolean, String>(false, 
 //            			((EditText)findViewById(R.id.stateField)).getText().toString()));
-            	signupInfo.put("Email Address", new Pair<Boolean, String>(true, 
+            	signupInfo.put("email", new Pair<Boolean, String>(true, 
             			((EditText)findViewById(R.id.emailField)).getText().toString()));
             	signupInfo.put("Password", new Pair<Boolean, String>(true, 
             			((EditText)findViewById(R.id.passwordField)).getText().toString()));
             	signupInfo.put("Password Confirmation", new Pair<Boolean, String>(true, 
             			((EditText)findViewById(R.id.confPasswordField)).getText().toString()));
-
-        		Log.i("SIGNUP_INFO", "" + signupInfo.entrySet().size());
+            	
+        		//Log.i("SIGNUP_INFO", "" + signupInfo.entrySet().size());
             	for (Entry<String, Pair<Boolean, String>> entry : signupInfo.entrySet())
             	{
             		Pair<Boolean, String> value = (Pair<Boolean, String>)entry.getValue();

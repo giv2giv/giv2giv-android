@@ -5,14 +5,19 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
@@ -24,7 +29,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.util.Log;
 
 public final class UpdateQueue 
 {
@@ -269,6 +273,52 @@ public final class UpdateQueue
 	
 	private static boolean httpPost(Context context, String url, JSONObject message)
 	{
+		HttpClient client = new DefaultHttpClient();
+		HttpPost post = new HttpPost(url);
+		
+		
 		return true;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static String makeRequest(String url, Map data, Map headers)
+			throws Exception 
+	{
+
+		HttpClient client = new DefaultHttpClient();
+		HttpPost post = new HttpPost(url);
+		Iterator iter = data.entrySet().iterator();
+
+		JSONObject holder = new JSONObject();
+
+		while(iter.hasNext()) 
+		{
+			Entry pairs = (Entry)iter.next();
+			String key = (String)pairs.getKey();
+			String values = (String)pairs.getValue();
+			   
+//			JSONObject innerData = new JSONObject();
+//			Iterator iter2 = m.entrySet().iterator();
+//			while(iter2.hasNext()) 
+//			{
+//				Entry pairs2 = (Entry)iter2.next();
+//				innerData.put((String)pairs2.getKey(), (String)pairs2.getValue());
+//			}
+			holder.put(key, values);
+		}
+		iter = headers.entrySet().iterator();
+		while (iter.hasNext())
+		{
+			Entry pairs = (Entry)iter.next();
+			String key = (String)pairs.getKey();
+			String value = (String)pairs.getValue();
+			post.setHeader(key, value);
+		}
+		StringEntity entity = new StringEntity(holder.toString());
+		post.setEntity(entity);
+		post.setHeader("Content-type", "application/json");
+
+		ResponseHandler responseHandler = new BasicResponseHandler();
+		return client.execute(post, responseHandler).toString();
 	}
 }
