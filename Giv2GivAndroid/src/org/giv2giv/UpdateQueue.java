@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -29,10 +30,65 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
 
 public final class UpdateQueue 
 {
 	public static Hashtable<String, String> updateQueue;
+	
+	public static String CreateDonor(Map data)
+	{
+		//Parameters: address, city, country, email, name, password, phone_number, state, zip
+		HashMap<String, String> fixedData = new HashMap<String, String>();
+		fixedData.put("name", "" + data.get("First Name") + " " + data.get("Last Name"));
+		//Log.i("SIGNUP_INFO", "name: " + data.get("First Name") + data.get("Last Name"));
+		fixedData.put("email", "" + data.get("Email Address"));
+		///Log.i("SIGNUP_INFO", "email: " + data.get("Email Address"));
+		fixedData.put("password", "" + data.get("Password"));
+		//Log.i("SIGNUP_INFO", "pw: " + data.get("Password"));
+		String address = "" + data.get("First Address") + data.get("Second Address");
+		if (!address.equals(""))
+		{
+			fixedData.put("address", address);
+		}
+		String city = "" + data.get("City");
+		if (!city.equals(""))
+		{
+			fixedData.put("city", city);
+		}
+		String state = "" + data.get("State");
+		if (!state.equals(""))
+		{
+			fixedData.put("state", state);
+		}
+		String zip = "" + data.get("Zip Code");
+		if (!zip.equals(""))
+		{
+			fixedData.put("zip", zip);
+		}
+		String url = "http://www.giv2giv.org/api/donors.json";
+//		fixedData.put("name", "dodge Tesat");
+//		fixedData.put("email", "dodgetesdstsdsd@email.com");
+//		fixedData.put("password", "dodgetest");
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put("Content-Type", "application/json");
+		//fixedData.put("email", "dodgetest@email.com");
+		try 
+		{
+			return httpPost(url, fixedData, headers);
+		} 
+		catch (Exception e) 
+		{
+			Log.i("UPDATE_QUEUE", "Create donor Failed with " + e.toString());
+			e.printStackTrace();
+			return "";
+		}
+	}
+	
+	public static boolean CheckEmailInUse(String emailAddress)
+	{
+		return false;
+	}
 	
 	private UpdateQueue(Context context)
 	{
@@ -270,19 +326,10 @@ public final class UpdateQueue
 		}
 		return response;
 	}
-	
-	private static boolean httpPost(Context context, String url, JSONObject message)
-	{
-		HttpClient client = new DefaultHttpClient();
-		HttpPost post = new HttpPost(url);
 		
-		
-		return true;
-	}
-	
 	@SuppressWarnings("unchecked")
-	public static String makeRequest(String url, Map data, Map headers)
-			throws Exception 
+	private static String httpPost(String url, Map data, Map headers) 
+			throws UnsupportedEncodingException, JSONException
 	{
 
 		HttpClient client = new DefaultHttpClient();
@@ -306,19 +353,35 @@ public final class UpdateQueue
 //			}
 			holder.put(key, values);
 		}
-		iter = headers.entrySet().iterator();
-		while (iter.hasNext())
-		{
-			Entry pairs = (Entry)iter.next();
-			String key = (String)pairs.getKey();
-			String value = (String)pairs.getValue();
-			post.setHeader(key, value);
-		}
+//		iter = headers.entrySet().iterator();
+//		while (iter.hasNext())
+//		{
+//			Entry pairs = (Entry)iter.next();
+//			String key = (String)pairs.getKey();
+//			String value = (String)pairs.getValue();
+//			post.setHeader(key, value);
+//		}
+		post.setHeader("Content-Type", "application/json");
+		Log.i("SIGNUP_INFO", holder.toString());
 		StringEntity entity = new StringEntity(holder.toString());
 		post.setEntity(entity);
-		post.setHeader("Content-type", "application/json");
 
 		ResponseHandler responseHandler = new BasicResponseHandler();
-		return client.execute(post, responseHandler).toString();
+		try 
+		{
+			return client.execute(post, responseHandler).toString();
+			//return response.toString();
+		} 
+		catch (ClientProtocolException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		catch (IOException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "";
 	}
 }

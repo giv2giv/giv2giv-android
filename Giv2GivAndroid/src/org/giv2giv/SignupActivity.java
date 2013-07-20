@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -54,93 +55,65 @@ public class SignupActivity extends Activity
             			((EditText)findViewById(R.id.cityField)).getText().toString()));
             	signupInfo.put("State", new Pair<Boolean, String>(false, 
             			((EditText)findViewById(R.id.stateField)).getText().toString()));
+            	signupInfo.put("Zip Code", new Pair<Boolean, String>(false, 
+            			((EditText)findViewById(R.id.zipcodeField)).getText().toString()));
 //            	signupInfo.put("country", new Pair<Boolean, String>(false, 
 //            			((EditText)findViewById(R.id.stateField)).getText().toString()));
-            	signupInfo.put("email", new Pair<Boolean, String>(true, 
-            			((EditText)findViewById(R.id.emailField)).getText().toString()));
-            	signupInfo.put("Password", new Pair<Boolean, String>(true, 
-            			((EditText)findViewById(R.id.passwordField)).getText().toString()));
-            	signupInfo.put("Password Confirmation", new Pair<Boolean, String>(true, 
-            			((EditText)findViewById(R.id.confPasswordField)).getText().toString()));
+            	String emailAddress = ((EditText)findViewById(R.id.emailField)).getText().toString();
+            	signupInfo.put("Email Address", new Pair<Boolean, String>(true, emailAddress));
+            	String firstPW = ((EditText)findViewById(R.id.passwordField)).getText().toString();
+            	signupInfo.put("Password", new Pair<Boolean, String>(true, firstPW));
+            	String secondPW = ((EditText)findViewById(R.id.confPasswordField)).getText().toString();
+            	signupInfo.put("Password Confirmation", new Pair<Boolean, String>(true, secondPW));
             	
-        		//Log.i("SIGNUP_INFO", "" + signupInfo.entrySet().size());
+            	HashMap<String, String> infoMap = new HashMap<String, String>();
+            	Bundle info = new Bundle();
+            	if (firstPW.equals(secondPW))
+            	{
+            		createDialog(v.getContext(), "Password mismatch",
+            				"Please enter the same password in both fields.");
+            		return;
+            	}
+            	if (UpdateQueue.CheckEmailInUse(emailAddress))
+            	{
+            		createDialog(v.getContext(), "Email in Use",
+            				"Sorry, that email is in use. Please enter a different email.");
+            		return;
+            	}
             	for (Entry<String, Pair<Boolean, String>> entry : signupInfo.entrySet())
             	{
             		Pair<Boolean, String> value = (Pair<Boolean, String>)entry.getValue();
             		Log.i("SIGNUP_INFO", entry.getKey() + value.second);
             		if (value.first && value.second.equals(""))
             		{
-            			AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-                    	builder.setTitle("Missing Information").setCancelable(false)
-                    	.setMessage("Please fill in all required fields: " + entry.getKey())
-                    	.setNegativeButton("Return", new DialogInterface.OnClickListener() 
-                    	{
-                    		public void onClick(DialogInterface dialog, int id) 
-                    		{
-                    			dialog.cancel();
-                    		}
-                    	});
-                    	AlertDialog alert = builder.create();
-                    	alert.show();
+            			createDialog(v.getContext(), "Missing Information",
+            					"Please fill in the following required field: " + entry.getKey());
                     	return;
-                    	
             		}
-            		//if (signupInfo[])
+            		infoMap.put(entry.getKey(), value.second);
             	}
-//            	for (int i = 0; i < signupInfo.length - 1; i++)
-//            	{
-//            		if (signupInfo[i].equals(""))
-//            		{
-//            			AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-//                    	builder.setTitle("Missing Information").setCancelable(false)
-//                    	.setMessage("Please fill in all required fields")
-//                    	.setNegativeButton("Return", new DialogInterface.OnClickListener() 
-//                    	{
-//                    		public void onClick(DialogInterface dialog, int id) 
-//                    		{
-//                    			dialog.cancel();
-//                    		}
-//                    	});
-//                    	AlertDialog alert = builder.create();
-//                    	alert.show();
-//                    	return;
-//            		}
-//            	}
-//            	if (!signupInfo[7].equals(signupInfo[8]))
-//            	{
-//            		AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-//                	builder.setTitle("Incorrect Information").setCancelable(false)
-//                	.setMessage("Passwords do not match")
-//                	.setNegativeButton("Return", new DialogInterface.OnClickListener() 
-//                	{
-//                		public void onClick(DialogInterface dialog, int id) 
-//                		{
-//                			dialog.cancel();
-//                		}
-//                	});
-//                	AlertDialog alert = builder.create();
-//                	alert.show();
-//                	return;
-//            	}
-//            	Bundle info = new Bundle();
-//            	//Name
-//            	String personalInfo = "\n" + signupInfo[0] + " " + signupInfo[1];
-//            	//Address
-//            	personalInfo += "\n" + signupInfo[2];
-//            	if (!signupInfo[8].equals(""))
-//            	{
-//            		personalInfo += "\n" + signupInfo[8];
-//            	}
-//            	//City, State Zip
-//            	personalInfo += "\n" + signupInfo[3] + ", " + signupInfo[4]
-//            			+ " " + signupInfo[5];
-//            	//Email
-//            	personalInfo += "\n" + signupInfo[6];
-//            	info.putString("personalInfo", personalInfo);
-//            	nextScreen.putExtra("info", info);
+            	info.putSerializable("info", infoMap);
+            	nextScreen.putExtra("info", info);
             	startActivity(nextScreen);
             	return;
             }
         });
+	}
+
+	public void createDialog(Context context, String title, String message)
+	{
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+    	builder.setTitle(title).setCancelable(false)
+    	.setMessage(message)
+    	.setNegativeButton("Return", new DialogInterface.OnClickListener() 
+    	{
+    		public void onClick(DialogInterface dialog, int id) 
+    		{
+    			dialog.cancel();
+    		}
+    	});
+    	AlertDialog alert = builder.create();
+    	alert.show();
+    	return;
 	}
 }

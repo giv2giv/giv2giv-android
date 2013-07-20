@@ -32,13 +32,15 @@ public class ConfirmationActivity extends Activity
     	HashMap<String, String> headers = new HashMap();
     	headers.put("Content-Type", "application/json");
     	String httpResult = "Request crashed";
+    	Bundle infoToConfirm = this.getIntent().getBundleExtra("info");
+    	HashMap<String, String> info = (HashMap<String, String>)infoToConfirm.getSerializable("info");
     	try {
-			httpResult = UpdateQueue.makeRequest("http://www.giv2giv.org/api/donors.json", test, headers);
-			Log.i("SIGNUP_INFO", "LOGIN_SUCCESSFUL");
+			httpResult = UpdateQueue.CreateDonor(info);
+			Log.i("SIGNUP_INFO", httpResult);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			httpResult = e.toString();
-			Log.i("SIGNUP_INFO", "LOGIN_FAILED");
+			Log.i("SIGNUP_INFO", httpResult);
 			e.printStackTrace();
 		}
     	TextView output = (TextView)findViewById(R.id.infoToConfirm);
