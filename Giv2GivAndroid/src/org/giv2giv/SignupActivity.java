@@ -68,10 +68,17 @@ public class SignupActivity extends Activity
             	
             	HashMap<String, String> infoMap = new HashMap<String, String>();
             	Bundle info = new Bundle();
-            	if (firstPW.equals(secondPW))
+            	Log.i("SIGNUP_INFO", "||" + firstPW + "||" + secondPW + "||");
+            	if (!firstPW.equals(secondPW))
             	{
             		createDialog(v.getContext(), "Password mismatch",
             				"Please enter the same password in both fields.");
+            		return;
+            	}
+            	if (!emailAddress.matches("\\A[\\w+\\-.]+@[a-z\\d\\-.]+\\.[a-z]+\\z"))
+            	{
+            		createDialog(v.getContext(), "Invalid Email",
+            				"Please enter a valid email address");
             		return;
             	}
             	if (UpdateQueue.CheckEmailInUse(emailAddress))
