@@ -85,6 +85,30 @@ public final class UpdateQueue
 		}
 	}
 	
+	public static String AuthenticateUser(String email, String password)
+	{
+		Map<String, String> data = new HashMap<String, String>();
+		String url = "http://www.giv2giv.org/api/sessions/create.json";
+		data.put("email", email);
+		data.put("password", password);
+		try 
+		{
+			String response = httpPost(url, data, new HashMap<String, String>());
+			JSONObject jsonResponse = new JSONObject(response);
+			if (jsonResponse.has("token"))
+			{
+				String token = jsonResponse.getString("token");
+				return token;
+			}
+		} 
+		catch (Exception e) 
+		{
+			Log.i("UPDATE_QUEUE", "Create donor Failed with " + e.toString());
+			e.printStackTrace();
+		}
+		return "";
+	}
+	
 	public static boolean CheckEmailInUse(String emailAddress)
 	{
 		return false;
@@ -375,11 +399,13 @@ public final class UpdateQueue
 		catch (ClientProtocolException e) 
 		{
 			// TODO Auto-generated catch block
+			Log.i("AUTHENTICATE", "Client Protocol Exception");
 			e.printStackTrace();
 		} 
 		catch (IOException e) 
 		{
 			// TODO Auto-generated catch block
+			Log.i("AUTHENTICATE", "IO ExceptioN");
 			e.printStackTrace();
 		}
 		return "";
