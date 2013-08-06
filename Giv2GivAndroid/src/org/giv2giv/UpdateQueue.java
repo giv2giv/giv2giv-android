@@ -40,13 +40,13 @@ public final class UpdateQueue
 	{
 		//Parameters: address, city, country, email, name, password, phone_number, state, zip
 		HashMap<String, String> fixedData = new HashMap<String, String>();
-		fixedData.put("name", "" + data.get("First Name") + " " + data.get("Last Name"));
+		fixedData.put("name", "" + data.get("Name"));
 		//Log.i("SIGNUP_INFO", "name: " + data.get("First Name") + data.get("Last Name"));
 		fixedData.put("email", "" + data.get("Email Address"));
 		///Log.i("SIGNUP_INFO", "email: " + data.get("Email Address"));
 		fixedData.put("password", "" + data.get("Password"));
 		//Log.i("SIGNUP_INFO", "pw: " + data.get("Password"));
-		String address = "" + data.get("First Address") + data.get("Second Address");
+		String address = "" + data.get("Address");
 		if (!address.equals(""))
 		{
 			fixedData.put("address", address);

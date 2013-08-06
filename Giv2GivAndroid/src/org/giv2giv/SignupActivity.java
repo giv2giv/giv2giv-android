@@ -43,28 +43,25 @@ public class SignupActivity extends Activity
             	Intent nextScreen = new Intent(v.getContext(), ConfirmationActivity.class);
             	//Second address is at the end as it is the only non-mandatory field
             	//This is done to simplify the check for empty responses immediately below
-            	signupInfo.put("First Name", new Pair<Boolean, String>(true, 
-            			((EditText)findViewById(R.id.firstNameField)).getText().toString()));
-            	signupInfo.put("Last Name", new Pair<Boolean, String>(true, 
-            			((EditText)findViewById(R.id.lastNameField)).getText().toString()));
-            	signupInfo.put("First Address", new Pair<Boolean, String>(false, 
-            			((EditText)findViewById(R.id.firstAddressField)).getText().toString()));
-            	signupInfo.put("Second Address", new Pair<Boolean, String>(false, 
-            			((EditText)findViewById(R.id.secondAddressField)).getText().toString()));
-            	signupInfo.put("City",new Pair<Boolean, String>(false, 
-            			((EditText)findViewById(R.id.cityField)).getText().toString()));
+            	String fullName = ((EditText)findViewById(R.id.firstNameField)).getText().toString();
+            	fullName += " " + ((EditText)findViewById(R.id.lastNameField)).getText().toString();
+            	String fullAddress = ((EditText)findViewById(R.id.firstAddressField)).getText().toString();
+            	fullAddress += " " + ((EditText)findViewById(R.id.secondAddressField)).getText().toString();
+            	String emailAddress = ((EditText)findViewById(R.id.emailField)).getText().toString();
+            	signupInfo.put("Name", new Pair<Boolean, String>(true, fullName));
+            	signupInfo.put("Email Address", new Pair<Boolean, String>(true, emailAddress));
             	signupInfo.put("State", new Pair<Boolean, String>(false, 
             			((EditText)findViewById(R.id.stateField)).getText().toString()));
             	signupInfo.put("Zip Code", new Pair<Boolean, String>(false, 
             			((EditText)findViewById(R.id.zipcodeField)).getText().toString()));
+            	signupInfo.put("City",new Pair<Boolean, String>(false, 
+            			((EditText)findViewById(R.id.cityField)).getText().toString()));
 //            	signupInfo.put("country", new Pair<Boolean, String>(false, 
 //            			((EditText)findViewById(R.id.stateField)).getText().toString()));
-            	String emailAddress = ((EditText)findViewById(R.id.emailField)).getText().toString();
-            	signupInfo.put("Email Address", new Pair<Boolean, String>(true, emailAddress));
+            	signupInfo.put("Address", new Pair<Boolean, String>(false, fullAddress));
+            	
             	String firstPW = ((EditText)findViewById(R.id.passwordField)).getText().toString();
-            	signupInfo.put("Password", new Pair<Boolean, String>(true, firstPW));
             	String secondPW = ((EditText)findViewById(R.id.confPasswordField)).getText().toString();
-            	signupInfo.put("Password Confirmation", new Pair<Boolean, String>(true, secondPW));
             	
             	HashMap<String, String> infoMap = new HashMap<String, String>();
             	Bundle info = new Bundle();
@@ -75,6 +72,7 @@ public class SignupActivity extends Activity
             				"Please enter the same password in both fields.");
             		return;
             	}
+            	signupInfo.put("Password", new Pair<Boolean, String>(true, firstPW));
             	if (!emailAddress.matches("\\A[\\w+\\-.]+@[a-z\\d\\-.]+\\.[a-z]+\\z"))
             	{
             		createDialog(v.getContext(), "Invalid Email",
@@ -91,13 +89,14 @@ public class SignupActivity extends Activity
             	{
             		Pair<Boolean, String> value = (Pair<Boolean, String>)entry.getValue();
             		Log.i("SIGNUP_INFO", entry.getKey() + value.second);
-            		if (value.first && value.second.equals(""))
+            		if (value.first && value.second.trim().equals(""))
             		{
             			createDialog(v.getContext(), "Missing Information",
             					"Please fill in the following required field: " + entry.getKey());
                     	return;
             		}
             		infoMap.put(entry.getKey(), value.second);
+            		Log.i("SIGNUP_INFO", value.second);
             	}
             	info.putSerializable("info", infoMap);
             	nextScreen.putExtra("info", info);

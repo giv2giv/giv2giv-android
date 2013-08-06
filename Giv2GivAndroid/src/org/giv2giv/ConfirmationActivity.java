@@ -1,12 +1,15 @@
 package org.giv2giv;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -25,37 +28,20 @@ public class ConfirmationActivity extends Activity
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.confirmation_screen);
-		HashMap<String, String> test = new HashMap();
-    	test.put("name", "David Dodge");
-    	test.put("email", "davids@email.com");
-    	test.put("password", "mypassword");
-    	HashMap<String, String> headers = new HashMap();
+    	HashMap<String, String> headers = new HashMap<String, String>();
     	headers.put("Content-Type", "application/json");
-    	String httpResult = "Request crashed";
-    	Bundle infoToConfirm = this.getIntent().getBundleExtra("info");
-    	HashMap<String, String> info = (HashMap<String, String>)infoToConfirm.getSerializable("info");
-    	try {
-			httpResult = UpdateQueue.CreateDonor(info);
-			Log.i("SIGNUP_INFO", httpResult);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			httpResult = e.toString();
-			Log.i("SIGNUP_INFO", httpResult);
-			e.printStackTrace();
-		}
+    	final HashMap<String, String> info = (HashMap<String, String>)this.getIntent()
+    			.getBundleExtra("info").getSerializable("info");
+    	
     	TextView output = (TextView)findViewById(R.id.infoToConfirm);
-    	output.setText(httpResult);
-		//String charity = UpdateQueue.GetCharityList(this)[0];
+    	String userInfo = "";
+    	for (String key : info.keySet())
+    	{
+    		userInfo += key + ": " + info.get(key) + "\n";
+    	}
+    	output.setText(userInfo);
 		Button completeButton = (Button)findViewById(R.id.confirmButton);
-//        Bundle infoToConfirm = this.getIntent().getBundleExtra("info");
-//        ((TextView)findViewById(R.id.infoToConfirm)).setText(
-//        		(CharSequence)infoToConfirm.getCharSequence("personalInfo"));
-		
-		/*Button loginButton = (Button)findViewById(R.id.connectButton);
-		final EditText usernameEntry = (EditText)findViewById(R.id.usernameField);
-		final EditText connectEntry = (EditText)findViewById(R.id.connectField);
-		ImageButton setButton = (ImageButton)findViewById(R.id.dashSetButton);*/
-        completeButton.setOnClickListener(new OnClickListener() 
+        completeButton.setOnClickListener(new OnClickListener()
         {
             @Override
             public void onClick(View v) 
@@ -65,6 +51,16 @@ public class ConfirmationActivity extends Activity
         		AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
             	if (termsAgreed.isChecked())
             	{
+                	String httpResult = "Request crashed";
+            		try {
+            			new DonorSignupTask(v.getContext()).execute(info);
+            			Log.i("SIGNUP_INFO", httpResult);
+            		} catch (Exception e) {
+            			// TODO Auto-generated catch block
+            			httpResult = e.toString();
+            			Log.i("SIGNUP_INFO", httpResult);
+            			e.printStackTrace();
+            		}/*
 	            	builder.setTitle("Add Charities").setCancelable(false)
 	            	.setMessage("Would you like to add charities to your watch list?")
 	            	.setPositiveButton("Yes", new DialogInterface.OnClickListener() 
@@ -84,7 +80,7 @@ public class ConfirmationActivity extends Activity
 	            			startActivity(nextScreen);
 	            			finish();
 	            		}
-	            	});
+	            	});*/
             	}
             	else
             	{
@@ -98,8 +94,8 @@ public class ConfirmationActivity extends Activity
 	            		}
 	            	});
             	}
-            	AlertDialog alert = builder.create();
-            	alert.show();
+            	//AlertDialog alert = builder.create();
+            	//alert.show();
         		//UpdateQueue.GetUserToken(v.getContext(), connectEntry.getText().toString());
         		/*if (UpdateQueue.GetUserToken(v.getContext(), "dodge"))
         		{
@@ -109,5 +105,44 @@ public class ConfirmationActivity extends Activity
             	return;
             }
         });
+	}
+
+	private class DonorSignupTask extends AsyncTask<Map, Void, String>
+	{
+		private Context mContext;
+		private ProgressDialog mLoadingDialog;
+		
+		public DonorSignupTask(Context context)
+		{
+			mContext = context;
+		}
+		
+		@Override
+		protected void onPreExecute()
+		{
+			mLoadingDialog = ProgressDialog.show(mContext, "", 
+	                "Registration in progress...", true);
+		}
+		@Override
+		protected String doInBackground(Map... donorInfoSet) 
+		{
+			String httpResponse = "";
+			for (Map donorInfo : donorInfoSet)
+			{
+				//THIS SHOULD NEVER BE CREATING MORE THAN ON DONOR PER CALL
+				//SO THE BREAK IS TO PREVENT STUPIDITY OR MADNESS FROM HAPPENING
+				httpResponse = UpdateQueue.CreateDonor(donorInfo);
+				break;
+			}	
+			return httpResponse;
+		}
+		@Override
+		protected void onPostExecute(String httpResponse)
+		{
+	    	TextView output = (TextView)findViewById(R.id.infoToConfirm);
+	    	//output.setText(httpResponse);
+			mLoadingDialog.dismiss();
+			Log.i("SIGNUP_INFO", "Sign up Finished");
+		}
 	}
 }
